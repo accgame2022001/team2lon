@@ -123,7 +123,7 @@ const ROOMDESC = {
   india: 'Hoa văn mandala vàng cam và xanh ngọc'
 };
 /** DÁN URL Web App của Apps Script (kết thúc bằng /exec) vào đây */
-const API_URL = 'https://script.google.com/macros/s/AKfycbycoWjVuVaFGuffEGyqwqQKWhefpQ2BycYxw9UQ_EQ8gVrLr4gP2mG02zLcdqxdM0VTxA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwEN-ECDB2lwtTACIO75mjmQe_yewcISNxVDFjA5Hvd-M9lUYntfuZ-aDUcKYWNvEY8uA/exec';
 /** Gọi hàm backend qua fetch. Dùng text/plain để tránh lỗi CORS preflight */
 const api = async (fn, ...args) => {
   if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL)) throw new Error('Chưa cấu hình API_URL trong index.html');
