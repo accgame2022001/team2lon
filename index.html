@@ -64,7 +64,12 @@ input,textarea{background:rgba(0,0,0,.35);border:1px solid color-mix(in srgb,var
               <button id="skip" class="btn ghost hidden" onclick="skipMine()">Bỏ bài</button>
             </div>
             <div class="mt-2 h-2 rounded bg-black/40 overflow-hidden"><div id="vu" class="h-full" style="width:0;background:var(--b)"></div></div>
-            <div class="text-sm opacity-70 mt-1">Dùng tai nghe để micro không thu tiếng loa.</div>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 items-center mt-2 text-sm">
+              <label class="flex gap-1 items-center"><input id="mon" type="checkbox" style="width:auto" onchange="setMon()"> Nghe giọng mình</label>
+              <label class="flex gap-1 items-center">Âm lượng <input id="monv" type="range" min="0" max="100" value="80" style="width:80px;padding:0" oninput="setMon()"></label>
+              <label class="flex gap-1 items-center">Vang <input id="mone" type="range" min="0" max="100" value="35" style="width:80px;padding:0" oninput="setMon()"></label>
+            </div>
+            <div class="text-sm opacity-70 mt-1">Chỉ bật "Nghe giọng mình" khi đeo tai nghe, nếu không loa sẽ hú.</div>
           </div>
           <div class="text-right">
             <div id="score" class="text-5xl font-extrabold" style="color:var(--a)">0</div>
@@ -332,11 +337,28 @@ function openLine(i) {
 
 // ===== Chấm điểm: micro -> cao độ (tự tương quan) -> điểm từng dòng =====
 let ctx, an, buf, micT, lineAcc = { n: 0, v: 0, pairs: 0, stable: 0 }, prevSt = null, scores = [], combo = 0;
+let dryG, wetG;
+/** Tạo tiếng vang (reverb) bằng nhiễu giảm dần theo thời gian */
+function impulse(sec) {
+  const n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.5); }
+  return b;
+}
+/** Bật/tắt và chỉnh âm lượng, độ vang của giọng hát nghe lại */
+function setMon() {
+  if (!dryG) return;
+  const on = $('mon').checked, v = $('monv').value / 100, e = $('mone').value / 100;
+  dryG.gain.value = on ? v : 0; wetG.gain.value = on ? v * e * 1.5 : 0;
+}
 async function startMic() {
-  if (ctx) return ctx.resume();
+  if (ctx) { await ctx.resume(); return setMon(); }
   const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false } });
-  ctx = new AudioContext(); an = ctx.createAnalyser(); an.fftSize = 2048;
-  ctx.createMediaStreamSource(s).connect(an); buf = new Float32Array(an.fftSize);
+  ctx = new AudioContext({ latencyHint: 'interactive' }); an = ctx.createAnalyser(); an.fftSize = 2048;
+  const src = ctx.createMediaStreamSource(s); src.connect(an); buf = new Float32Array(an.fftSize);
+  // Đường nghe lại: mic -> (giọng gốc + vang) -> tai nghe
+  dryG = ctx.createGain(); wetG = ctx.createGain(); const cv = ctx.createConvolver(); cv.buffer = impulse(1.8);
+  src.connect(dryG); src.connect(cv); cv.connect(wetG); dryG.connect(ctx.destination); wetG.connect(ctx.destination);
+  setMon();
 }
 function resetScore() {
   scores = []; combo = 0; prevSt = null; $('score').textContent = '0'; $('rate').textContent = ''; $('combo').textContent = '';
