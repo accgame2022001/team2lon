@@ -150,7 +150,7 @@ const api = async (fn, ...args) => {
 const toast = m => alert(m);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let uid, S = { rooms: [], songs: [], room: null, st: null, lines: [], curId: null, mine: false };
-try { uid = localStorage.getItem('kid') || (localStorage.kid = Math.random().toString(36).slice(2, 10)); } catch (e) { uid = Math.random().toString(36).slice(2, 10); }
+try { uid = localStorage.getItem('kid') || (localStorage.kid = 'u' + Math.random().toString(36).slice(2, 9)); } catch (e) { uid = 'u' + Math.random().toString(36).slice(2, 9); }
 const myName = () => ($('nm').value.trim() || 'Khách ' + uid.slice(0, 3));
 try { $('nm').value = localStorage.getItem('kname') || ''; } catch (e) {}
 $('nm').onchange = () => { try { localStorage.kname = $('nm').value; } catch (e) {} };
@@ -179,6 +179,7 @@ function enter(id) {
   renderSongs(); tick(); poll = setInterval(tick, 3000);
 }
 function leave() {
+  const rid = S.room && S.room.id; if (rid) api('leaveRoom', rid, uid).catch(() => {});
   clearInterval(poll); stopAll(); S.room = null; voiceOff();
   S.room = null; document.body.className = 't-vip1';
   $('room').classList.add('hidden'); $('lobby').classList.remove('hidden'); loadLobby();
@@ -200,7 +201,7 @@ function renderRoom() {
   $('skip').classList.toggle('hidden', !mine);
   $('pause').classList.toggle('hidden', !(mine && cur.status === 'playing'));
   $('pause').textContent = cur && isP(cur) ? 'Tiếp tục' : 'Tạm dừng';
-  $('now').textContent = cur ? `${cur.status === 'playing' ? 'Đang hát' : 'Tiếp theo'}: ${cur.singer} - ${cur.song ? cur.song.title : ''}` : 'Chưa có ai hát. Hãy đặt một bài!';
+  $('now').textContent = cur ? `${cur.status === 'playing' ? 'Đang hát' : 'Tiếp theo'}: ${cur.singer} - ${cur.song ? cur.song.title : ''}${cur.status === 'waiting' && st.wait != null ? ' (chờ bấm hát ' + Math.ceil(st.wait / 1000) + 's)' : ''}` : 'Chưa có ai hát. Hãy đặt một bài!';
   // Người xem: tự phát và căn theo giờ máy chủ
   if (cur && cur.status === 'playing' && !mine) watch(cur, st.now);
   // Người xem: bài đã hết hoặc bị bỏ thì dừng video
@@ -531,6 +532,8 @@ async function saveSong() {
     S.songs = (await api('getBootstrap')).songs; renderSongs();
   } catch (e) { toast(e.message); }
 }
+// Đóng tab: báo máy chủ để lượt hát không bị kẹt
+addEventListener('pagehide', () => { if (S.room && navigator.sendBeacon) navigator.sendBeacon(API_URL, JSON.stringify({ fn: 'leaveRoom', args: [S.room.id, uid] })); });
 loadLobby();
 </script>
 </body>
