@@ -184,9 +184,18 @@ function leave() {
   S.room = null; document.body.className = 't-vip1';
   $('room').classList.add('hidden'); $('lobby').classList.remove('hidden'); loadLobby();
 }
+const srvNow = () => Date.now() + (S.off || 0);   // giờ máy chủ ước tính trên máy này
 async function tick() {
   if (!S.room) return;
-  try { S.st = await api('getRoomState', S.room.id, uid, myName(), vOn ? 1 : 0); renderRoom(); } catch (e) { console.warn(e); }
+  try {
+    // Người hát: gửi mốc bắt đầu thực tế của video (chỉ khi đang phát) để mọi người bám theo
+    let qid = '', sa = 0;
+    if (S.mine && S.curId && yt && yt.getPlayerState && yt.getPlayerState() === 1) { qid = S.curId; sa = Math.round(srvNow() - yt.getCurrentTime() * 1000); }
+    const t0 = Date.now();
+    S.st = await api('getRoomState', S.room.id, uid, myName(), vOn ? 1 : 0, qid, sa);
+    S.off = S.st.now - (t0 + Date.now()) / 2;   // độ lệch đồng hồ, bù một nửa thời gian đi-về
+    renderRoom();
+  } catch (e) { console.warn(e); }
 }
 
 // ===== Hiển thị hàng chờ, thành viên, bảng xếp hạng =====
@@ -309,7 +318,10 @@ function loadVideo(vid, start) {
     curVid = vid;
   });
 }
-function onYtState(e) { if (e.data === 0 && S.mine) endSong(); }   // 0 = video kết thúc
+function onYtState(e) {
+  if (e.data === 0 && S.mine) endSong();   // 0 = video kết thúc
+  if (e.data === 1 && S.mine) tick();      // 1 = bắt đầu phát: gửi mốc đồng bộ ngay
+}
 
 /** Bài chưa có lời đồng bộ: chia thành các đoạn 6 giây để vẫn chấm điểm, và phóng to video để đọc lời có sẵn */
 function linesFor(song) {
@@ -347,29 +359,31 @@ async function sing() {
   } catch (e) { toast(e.message); }
 }
 const isP = q => !!q && (q.paused === 1 || q.paused === '1' || q.paused === true);
-/** Người xem: bám theo trạng thái của máy chủ (đang phát tại giây X hoặc đang tạm dừng tại vị trí Y) */
-function watch(cur, serverNow) {
-  const paused = isP(cur), target = paused ? (+cur.pos || 0) / 1000 : (serverNow - cur.startedAt) / 1000;
+/** Vị trí (giây) mà video của người xem phải đang ở */
+const targetOf = c => isP(c) ? (+c.pos || 0) / 1000 : (srvNow() - c.sa) / 1000;
+/** Người xem: bám theo trạng thái của người hát (đang phát tại giây X hoặc đang dừng tại vị trí Y) */
+function watch(cur) {
+  if (!isP(cur) && !cur.sa) return;   // người hát chưa thực sự phát nhạc, chờ mốc đồng bộ
   if (S.curId !== cur.id) {
     S.curId = cur.id; S.mine = false; S.noMic = false; S.lines = linesFor(cur.song);
-    if (cur.song) loadVideo(cur.song.videoId, Math.max(0, target)).then(() => {
+    if (cur.song) loadVideo(cur.song.videoId, Math.max(0, targetOf(cur))).then(() => {
       loop();
-      setTimeout(() => {   // nếu phòng đang dừng thì dừng; nếu trình duyệt chặn tự phát thì hiện nút bấm
-        if (!yt || !yt.getPlayerState) return;
-        if (isP(cur)) yt.pauseVideo(); else $('tap').classList.toggle('hidden', yt.getPlayerState() === 1);
-      }, 2500);
+      setTimeout(() => { const c = S.st && S.st.queue.find(q => q.id === S.curId); if (c) applySync(c); }, 2500);   // chỉnh lại sau khi video tải xong
     });
     return;
   }
+  applySync(cur);
+}
+function applySync(cur) {
   if (!yt || !yt.getPlayerState) return;
-  const state = yt.getPlayerState();
+  const paused = isP(cur), target = targetOf(cur), state = yt.getPlayerState();
   if (paused) {
     if (state === 1) yt.pauseVideo();
     if (Math.abs(yt.getCurrentTime() - target) > 1) yt.seekTo(target, true);
   } else {
     if (state === 2) yt.playVideo();
-    if (Math.abs(yt.getCurrentTime() - target) > 3) yt.seekTo(Math.max(0, target), true);
-    $('tap').classList.toggle('hidden', state === 1 || state === 3);
+    if (state === 1 && Math.abs(yt.getCurrentTime() - target) > 1.5) yt.seekTo(Math.max(0, target), true);   // lệch quá 1,5 giây thì nhảy lại
+    $('tap').classList.toggle('hidden', state === 1 || state === 3);   // trình duyệt chặn tự phát thì hiện nút bấm
   }
 }
 async function endSong() {
