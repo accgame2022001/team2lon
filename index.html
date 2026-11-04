@@ -128,7 +128,7 @@ const ROOMDESC = {
   india: 'Hoa văn mandala vàng cam và xanh ngọc'
 };
 /** DÁN URL Web App của Apps Script (kết thúc bằng /exec) vào đây */
-const API_URL = 'https://script.google.com/macros/s/AKfycbwEN-ECDB2lwtTACIO75mjmQe_yewcISNxVDFjA5Hvd-M9lUYntfuZ-aDUcKYWNvEY8uA/exec';
+const API_URL = 'DÁN_URL_WEB_APP_VÀO_ĐÂY';
 /** Gọi hàm backend qua fetch. Dùng text/plain để tránh lỗi CORS preflight */
 const api = async (fn, ...args) => {
   if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL)) throw new Error('Chưa cấu hình API_URL trong index.html');
@@ -262,7 +262,15 @@ function parseLrc(t) {
 // ===== Người hát: mở mic, phát nhạc, chấm điểm =====
 async function sing() {
   const cur = S.st.queue[0]; if (!cur || !cur.song) return;
-  try { await startMic(); } catch (e) { return toast('Không mở được micro. Hãy cho phép truy cập micro và thử lại. (' + e.message + ')'); }
+  // Mở micro; nếu lỗi thì báo đúng nguyên nhân và cho hát không chấm điểm
+  S.noMic = false;
+  try { await startMic(); } catch (e) {
+    const why = e.name === 'NotFoundError' ? 'Không tìm thấy micro trên thiết bị. Hãy cắm micro hoặc tai nghe rồi thử lại.'
+      : e.name === 'NotAllowedError' ? 'Trình duyệt đang chặn quyền micro. Bấm biểu tượng ổ khóa cạnh thanh địa chỉ để cho phép.'
+      : 'Không mở được micro: ' + e.message;
+    if (!confirm(why + '\n\nBấm OK để vẫn hát nhưng không chấm điểm, Hủy để quay lại.')) return;
+    S.noMic = true;
+  }
   try {
     await api('startSong', cur.id);
     S.mine = true; S.curId = cur.id; S.lines = linesFor(cur.song); resetScore();
@@ -278,7 +286,10 @@ function watch(cur, serverNow) {
 }
 async function endSong() {
   const id = S.curId; S.mine = false; const sc = total();
-  try { await api('finishSong', id, sc); toast('Điểm của bạn: ' + sc); } catch (e) { toast(e.message); }
+  try {
+    if (S.noMic) await api('skipSong', id);   // hát không micro: không lưu điểm
+    else { await api('finishSong', id, sc); toast('Điểm của bạn: ' + sc); }
+  } catch (e) { toast(e.message); }
   stopAll(); tick();
 }
 async function skipMine() {
@@ -347,7 +358,7 @@ function detect() {
   return best > 0.8 ? sr / bl : 0;
 }
 function sample() {
-  if (!S.mine || idx < 0 || !S.lines[idx] || !S.lines[idx].text) return;
+  if (!S.mine || !ctx || idx < 0 || !S.lines[idx] || !S.lines[idx].text) return;
   const f = detect(); lineAcc.n++;
   if (f) {
     lineAcc.v++; const st = 12 * Math.log2(f / 440);
