@@ -64,12 +64,18 @@ input,textarea{background:rgba(0,0,0,.35);border:1px solid color-mix(in srgb,var
               <button id="skip" class="btn ghost hidden" onclick="skipMine()">Bỏ bài</button>
               <button id="pause" class="btn ghost hidden" onclick="togglePause()">Tạm dừng</button>
               <button id="tap" class="btn hidden" onclick="tapPlay()">Bấm để nghe nhạc</button>
+              <button id="resync" class="btn ghost hidden" onclick="resync()">Đồng bộ lại</button>
             </div>
             <div class="mt-2 h-2 rounded bg-black/40 overflow-hidden"><div id="vu" class="h-full" style="width:0;background:var(--b)"></div></div>
+            <div class="flex items-center gap-2 mt-2 text-xs">
+              <span id="tcur">0:00</span>
+              <input id="seek" type="range" min="0" max="100" step="1" value="0" disabled style="padding:0;flex:1" onpointerdown="seekStart()" onpointerup="seekEnd()" oninput="$('tcur').textContent = fmt(this.value)" onchange="doSeek(this.value)">
+              <span id="tdur">0:00</span><span id="drift" class="opacity-60"></span>
+            </div>
             <div class="flex flex-wrap gap-x-4 gap-y-1 items-center mt-2 text-sm">
-              <label class="flex gap-1 items-center"><input id="mon" type="checkbox" style="width:auto" onchange="setMon()"> Nghe giọng mình</label>
+              <label class="flex gap-1 items-center"><input id="mon" type="checkbox" checked style="width:auto" onchange="setMon()"> Nghe giọng mình</label>
               <label class="flex gap-1 items-center">Âm lượng <input id="monv" type="range" min="0" max="100" value="80" style="width:80px;padding:0" oninput="setMon()"></label>
-              <label class="flex gap-1 items-center">Vang <input id="mone" type="range" min="0" max="100" value="35" style="width:80px;padding:0" oninput="setMon()"></label>
+              <label class="flex gap-1 items-center">Vang <input id="mone" type="range" min="0" max="100" value="0" style="width:80px;padding:0" oninput="setMon()"></label>
             </div>
             <div class="text-sm opacity-70 mt-1">Chỉ bật "Nghe giọng mình" khi đeo tai nghe, nếu không loa sẽ hú.</div>
           </div>
@@ -191,9 +197,10 @@ async function tick() {
     // Người hát: gửi mốc bắt đầu thực tế của video (chỉ khi đang phát) để mọi người bám theo
     let qid = '', sa = 0;
     if (S.mine && S.curId && yt && yt.getPlayerState && yt.getPlayerState() === 1) { qid = S.curId; sa = Math.round(srvNow() - yt.getCurrentTime() * 1000); }
-    const t0 = Date.now();
     S.st = await api('getRoomState', S.room.id, uid, myName(), vOn ? 1 : 0, qid, sa);
-    S.off = S.st.now - (t0 + Date.now()) / 2;   // độ lệch đồng hồ, bù một nửa thời gian đi-về
+    // Độ lệch đồng hồ so với máy chủ: lấy trung vị 7 lần gần nhất để bớt nhiễu do độ trễ Apps Script
+    S.offs = (S.offs || []).concat(S.st.now - Date.now()).slice(-7);
+    const so = S.offs.slice().sort((a, b) => a - b); S.off = so[Math.floor(so.length / 2)];
     renderRoom();
   } catch (e) { console.warn(e); }
 }
@@ -210,6 +217,7 @@ function renderRoom() {
   $('skip').classList.toggle('hidden', !mine);
   $('pause').classList.toggle('hidden', !(mine && cur.status === 'playing'));
   $('pause').textContent = cur && isP(cur) ? 'Tiếp tục' : 'Tạm dừng';
+  $('resync').classList.toggle('hidden', !(cur && cur.status === 'playing' && !S.mine));
   $('now').textContent = cur ? `${cur.status === 'playing' ? 'Đang hát' : 'Tiếp theo'}: ${cur.singer} - ${cur.song ? cur.song.title : ''}${cur.status === 'waiting' && st.wait != null ? ' (chờ bấm hát ' + Math.ceil(st.wait / 1000) + 's)' : ''}` : 'Chưa có ai hát. Hãy đặt một bài!';
   // Người xem: tự phát và căn theo giờ máy chủ
   if (cur && cur.status === 'playing' && !mine) watch(cur, st.now);
@@ -279,6 +287,37 @@ function connectPeers(members) {
   });
   Object.keys(calls).forEach(id => { if (!ids[id]) dropCall(id); });
 }
+
+// ===== Thanh kéo thời gian: chỉ người hát kéo được, người xem chỉ xem =====
+let seeking = false;
+const fmt = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function seekStart() { seeking = true; }
+function seekEnd() { setTimeout(() => { seeking = false; }, 300); }
+async function doSeek(v) {
+  seeking = false;
+  if (!S.mine || !yt) return;
+  yt.seekTo(+v, true);
+  const cur = S.st && S.st.queue.find(q => q.id === S.curId);
+  if (cur && isP(cur)) {   // đang tạm dừng: lưu vị trí mới cho người xem
+    try { await api('pauseSong', cur.id, uid, Math.round(v * 1000)); cur.pos = Math.round(v * 1000); } catch (e) { toast(e.message); }
+  } else setTimeout(tick, 400);   // đang phát: gửi mốc đồng bộ mới
+}
+/** Người xem bấm để nhảy ngay tới vị trí của người hát */
+function resync() {
+  const c = S.st && S.st.queue.find(q => q.id === S.curId);
+  if (!c || !yt) return;
+  yt.seekTo(Math.max(0, targetOf(c)), true); if (!isP(c)) yt.playVideo();
+}
+/** Cập nhật thanh thời gian và hiển thị độ lệch so với người hát (mỗi 0,5 giây) */
+setInterval(() => {
+  if (!yt || typeof yt.getDuration !== 'function') return;
+  const sk = $('seek'), d = yt.getDuration() || 0, t = yt.getCurrentTime() || 0;
+  sk.disabled = !S.mine;
+  if (seeking) return;
+  sk.max = d || 100; sk.value = t; $('tcur').textContent = fmt(t); $('tdur').textContent = fmt(d);
+  const c = S.st && S.curId && S.st.queue.find(q => q.id === S.curId);
+  $('drift').textContent = (c && !S.mine && (c.sa || isP(c))) ? 'Lệch ' + (t - targetOf(c)).toFixed(1) + 's' : '';
+}, 500);
 
 // ===== Tìm nhạc trên YouTube rồi đặt hát =====
 let ytRes = [];
@@ -382,7 +421,7 @@ function applySync(cur) {
     if (Math.abs(yt.getCurrentTime() - target) > 1) yt.seekTo(target, true);
   } else {
     if (state === 2) yt.playVideo();
-    if (state === 1 && Math.abs(yt.getCurrentTime() - target) > 1.5) yt.seekTo(Math.max(0, target), true);   // lệch quá 1,5 giây thì nhảy lại
+    if (state === 1 && Math.abs(yt.getCurrentTime() - target) > 1) yt.seekTo(Math.max(0, target), true);   // lệch quá 1 giây thì nhảy lại
     $('tap').classList.toggle('hidden', state === 1 || state === 3);   // trình duyệt chặn tự phát thì hiện nút bấm
   }
 }
