@@ -2,592 +2,320 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Karaoke Online</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a0b2e">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Karaoke Room 3D</title>
 <style>
-/* ===== Chủ đề cho từng phòng: đổi biến màu + lớp trang trí nền ===== */
-:root{--bg:#0e0b10;--tx:#f4ece4;--a:#e8b44c;--b:#7a1f2b;--deco:none}
-.t-hoanggia{--bg:#1d0509;--tx:#fbefd8;--a:#e6b94d;--b:#8c1c2b;--deco:repeating-linear-gradient(90deg,#5c0f1c 0 34px,#7a1426 34px 68px)}
-.t-vip1{--bg:#08040f;--tx:#f3e9ff;--a:#ff2bd6;--b:#19e3ff;--deco:repeating-linear-gradient(115deg,transparent 0 40px,rgba(25,227,255,.14) 40px 42px,transparent 42px 90px,rgba(255,43,214,.16) 90px 92px)}
-.t-vip2{--bg:#04150f;--tx:#eafbe9;--a:#d9a441;--b:#1f7a52;--deco:radial-gradient(circle at 20% 25%,rgba(217,164,65,.22),transparent 40%),radial-gradient(circle at 80% 75%,rgba(31,122,82,.45),transparent 45%)}
-.t-vip3{--bg:#050b1f;--tx:#e8f1ff;--a:#8ec5ff;--b:#4b3fd0;--deco:radial-gradient(1.5px 1.5px at 20px 30px,#fff,transparent),radial-gradient(1px 1px at 90px 80px,#cfe3ff,transparent),radial-gradient(circle at 50% 120%,rgba(75,63,208,.6),transparent 60%);--dsize:140px 140px,140px 140px,auto}
-.t-india{--bg:#2a0a24;--tx:#fff3dc;--a:#ff9f1c;--b:#13b5a6;--deco:repeating-conic-gradient(from 0deg at 50% 125%,rgba(255,159,28,.2) 0 6deg,transparent 6deg 12deg)}
-body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--tx);transition:background .6s;min-height:100vh}
-.deco{position:fixed;inset:0;background:var(--deco);background-size:var(--dsize,auto);opacity:.85;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1}
-.panel{background:color-mix(in srgb,var(--bg) 78%,#000);border:1px solid color-mix(in srgb,var(--a) 35%,transparent);border-radius:14px}
-.btn{background:var(--a);color:#150a10;font-weight:700;border-radius:10px;padding:.45rem .9rem}
-.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--a)}
-.btn:disabled{opacity:.4}
-.rc{position:relative;overflow:hidden;border-radius:16px;background:var(--bg);border:2px solid var(--a);cursor:pointer;color:var(--tx);min-height:150px}
-.rc::before{content:'';position:absolute;inset:0;background:var(--deco);background-size:var(--dsize,auto)}
-.rc>div{position:relative}
-/* ===== Lời karaoke: dòng hiện tại tô màu dần theo biến --p ===== */
-.ly{font-weight:800;text-align:center;line-height:1.25;transition:opacity .3s}
-.ly.cur{font-size:clamp(1.6rem,4.2vw,2.6rem);background:linear-gradient(90deg,var(--a) var(--p,0%),rgba(255,255,255,.35) var(--p,0%));-webkit-background-clip:text;background-clip:text;color:transparent}
-.ly.nx{font-size:clamp(1.1rem,2.6vw,1.6rem);opacity:.55}
-.ly.pv{font-size:1rem;opacity:.3}
-input,textarea{background:rgba(0,0,0,.35);border:1px solid color-mix(in srgb,var(--a) 40%,transparent);border-radius:8px;padding:.4rem .6rem;width:100%;color:var(--tx)}
+:root{--bg:#1a0b2e;--card:#2a1647;--tx:#f4eaff;--ac:#ff4fa3;--ac2:#7c5cff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px system-ui,sans-serif;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+button,input{font:inherit;border-radius:10px;border:0;padding:10px 14px}
+input{background:#120720;color:var(--tx);border:1px solid #4b2b7a;width:100%}
+button{background:var(--ac2);color:#fff;cursor:pointer}
+button.p{background:var(--ac)}button.g{background:#3b2463}
+#lobby{margin:auto;width:min(92vw,380px);display:flex;flex-direction:column;gap:10px;text-align:center}
+#lobby h1{margin:0 0 6px}
+#app{display:none;flex:1;min-height:0;flex-direction:column}
+#top{display:flex;gap:8px;align-items:center;padding:8px;background:#120720}
+#top b{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#vwrap{aspect-ratio:16/9;max-height:34vh;background:#000;margin:0 auto;width:min(100%,60vh)}
+#yt{width:100%;height:100%}
+#cv{flex:0 0 22vh;width:100%;display:block}
+#side{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+.card{background:var(--card);border-radius:12px;padding:10px}
+.row{display:flex;gap:6px}
+.card h3{margin:0 0 6px;font-size:14px;color:#ffb3d9}
+.it{display:flex;justify-content:space-between;gap:6px;padding:5px 0;border-bottom:1px solid #4b2b7a;cursor:default}
+.it.s{cursor:pointer}
+#rate{display:none;position:fixed;inset:auto 0 0 0;background:#000d;padding:14px;text-align:center;z-index:9}
+#rate .n{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+#rate .n button{width:17%;min-width:50px}
+#toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--ac);padding:8px 14px;border-radius:20px;display:none;z-index:10}
+label{display:flex;gap:6px;align-items:center}label input{width:auto}
 </style>
 </head>
-<body class="t-vip1">
-<div class="deco"></div>
-<div class="wrap max-w-6xl mx-auto p-3">
-
-<!-- ===== SẢNH: danh sách phòng ===== -->
-<section id="lobby">
-  <h1 class="text-3xl font-extrabold mt-4">Karaoke Online</h1>
-  <div class="flex gap-2 items-center my-3">
-    <span>Tên của bạn</span><input id="nm" class="max-w-[220px]" maxlength="24">
-  </div>
-  <div id="rooms" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
-</section>
-
-<!-- ===== PHÒNG HÁT ===== -->
-<section id="room" class="hidden">
-  <div class="flex items-center gap-3 mb-3">
-    <button class="btn ghost" onclick="leave()">Về sảnh</button>
-    <h2 id="rname" class="text-2xl font-extrabold flex-1"></h2>
-    <button class="btn ghost" onclick="openAdd()">Thêm bài hát</button>
-  </div>
-  <div class="grid lg:grid-cols-3 gap-3">
-    <div class="lg:col-span-2 space-y-3">
-      <div class="panel p-3">
-        <div class="flex gap-3 flex-wrap items-start">
-          <div id="vbox" class="w-48 aspect-video bg-black rounded-lg overflow-hidden"><div id="yt"></div></div>
-          <div class="flex-1 min-w-[180px]">
-            <div id="now" class="font-semibold">Chưa có ai hát. Hãy đặt một bài!</div>
-            <div class="flex gap-2 mt-2">
-              <button id="go" class="btn hidden" onclick="sing()">Bắt đầu hát</button>
-              <button id="skip" class="btn ghost hidden" onclick="skipMine()">Bỏ bài</button>
-              <button id="pause" class="btn ghost hidden" onclick="togglePause()">Tạm dừng</button>
-              <button id="tap" class="btn hidden" onclick="tapPlay()">Bấm để nghe nhạc</button>
-              <button id="resync" class="btn ghost hidden" onclick="resync()">Đồng bộ lại</button>
-            </div>
-            <div class="mt-2 h-2 rounded bg-black/40 overflow-hidden"><div id="vu" class="h-full" style="width:0;background:var(--b)"></div></div>
-            <div class="flex items-center gap-2 mt-2 text-xs">
-              <span id="tcur">0:00</span>
-              <input id="seek" type="range" min="0" max="100" step="1" value="0" disabled style="padding:0;flex:1" onpointerdown="seekStart()" onpointerup="seekEnd()" oninput="$('tcur').textContent = fmt(this.value)" onchange="doSeek(this.value)">
-              <span id="tdur">0:00</span><span id="drift" class="opacity-60"></span>
-            </div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 items-center mt-2 text-sm">
-              <label class="flex gap-1 items-center"><input id="mon" type="checkbox" checked style="width:auto" onchange="setMon()"> Nghe giọng mình</label>
-              <label class="flex gap-1 items-center">Âm lượng <input id="monv" type="range" min="0" max="100" value="80" style="width:80px;padding:0" oninput="setMon()"></label>
-              <label class="flex gap-1 items-center">Vang <input id="mone" type="range" min="0" max="100" value="0" style="width:80px;padding:0" oninput="setMon()"></label>
-            </div>
-            <div class="text-sm opacity-70 mt-1">Chỉ bật "Nghe giọng mình" khi đeo tai nghe, nếu không loa sẽ hú.</div>
-          </div>
-          <div class="text-right">
-            <div id="score" class="text-5xl font-extrabold" style="color:var(--a)">0</div>
-            <div id="rate" class="text-sm h-5"></div>
-            <div id="combo" class="text-xs opacity-70"></div>
-          </div>
-        </div>
-      </div>
-      <div class="panel p-5 min-h-[260px] flex flex-col justify-center gap-3" id="stage">
-        <div id="l0" class="ly pv"></div><div id="l1" class="ly cur">Lời bài hát sẽ chạy ở đây</div>
-        <div id="l2" class="ly nx"></div><div id="l3" class="ly nx"></div>
-      </div>
-    </div>
-    <div class="space-y-3">
-      <div class="panel p-3"><b>Danh sách phát của phòng</b><div id="queue" class="text-sm mt-1 space-y-1"></div></div>
-      <div class="panel p-3"><b>Tìm nhạc trên YouTube</b>
-        <div class="flex gap-2 mt-1"><input id="yq" placeholder="Tên bài hoặc ca sĩ" onkeydown="if(event.key==='Enter')ytSearch()"><button class="btn" onclick="ytSearch()">Tìm</button></div>
-        <label class="text-xs flex gap-1 items-center mt-1"><input id="ykar" type="checkbox" checked style="width:auto"> Ưu tiên bản karaoke</label>
-        <div id="yres" class="text-sm mt-2 space-y-2 max-h-72 overflow-auto"></div>
-      </div>
-      <div class="panel p-3"><b>Thư viện bài hát</b>
-        <input id="q" class="mt-1" placeholder="Tìm bài hoặc ca sĩ" oninput="renderSongs()">
-        <div id="songs" class="text-sm mt-2 space-y-1 max-h-56 overflow-auto"></div>
-      </div>
-      <div class="panel p-3"><b>Trong phòng</b><div id="mem" class="text-sm mt-1"></div>
-        <div class="flex gap-2 mt-2"><button id="vbtn" class="btn ghost" onclick="toggleVoice()">Bật voice</button><button id="vmute" class="btn ghost hidden" onclick="toggleMute()">Tắt tiếng mic</button></div>
-        <div class="text-xs opacity-60 mt-1">Voice cần tai nghe để không bị hú.</div></div>
-      <div class="panel p-3"><b>Bảng xếp hạng phòng</b><div id="board" class="text-sm mt-1 space-y-1"></div></div>
-    </div>
-  </div>
-</section>
+<body>
+<div id="lobby">
+  <h1>🎤 Karaoke Room 3D</h1>
+  <input id="name" placeholder="Tên của bạn" maxlength="14">
+  <input id="code" placeholder="Mã phòng (vd: abc123)" maxlength="12">
+  <div class="row"><button class="p" style="flex:1" onclick="go(true)">Tạo phòng</button><button style="flex:1" onclick="go(false)">Vào phòng</button></div>
+  <small id="err" style="color:#ff9"></small>
 </div>
 
-<!-- ===== Hộp thoại thêm bài + đồng bộ lời ===== -->
-<div id="add" class="hidden fixed inset-0 z-20 bg-black/70 overflow-auto p-3">
-  <div class="panel max-w-xl mx-auto p-4 space-y-2" style="background:var(--bg)">
-    <b class="text-lg">Thêm bài hát từ YouTube</b>
-    <input id="aurl" placeholder="Link YouTube (bản karaoke/beat)">
-    <div class="flex gap-2"><input id="atit" placeholder="Tên bài"><input id="aart" placeholder="Ca sĩ"></div>
-    <textarea id="alrc" rows="8" placeholder="Dán lời. Dạng có mốc: [01:23.50] lời... Hoặc dán lời thường rồi bấm Đồng bộ."></textarea>
-    <div class="flex gap-2 flex-wrap">
-      <button class="btn ghost" onclick="syncStart()">Đồng bộ lời theo nhạc</button>
-      <button id="stamp" class="btn hidden" onclick="stamp()">Đánh dấu dòng tiếp theo</button>
-      <span id="sinfo" class="text-sm self-center"></span>
+<div id="app">
+  <div id="top"><b id="rm"></b><button class="g" onclick="copyLink()">Sao chép link</button><button class="g" onclick="cheer()">🍻</button></div>
+  <div id="vwrap"><div id="yt"></div></div>
+  <canvas id="cv"></canvas>
+  <div id="side">
+    <div class="card"><h3 id="nowt">Chưa có bài hát</h3>
+      <div class="row"><button class="g" id="skip" onclick="skip()" style="display:none">⏭ Bỏ qua bài</button></div>
+      <label><input type="checkbox" id="fx" checked> Lọc giọng (vang, nén, sáng giọng)</label>
+      <label><input type="checkbox" id="mon" checked> Nghe lại giọng mình (nên đeo tai nghe)</label>
     </div>
-    <div id="yt2" class="hidden w-64 aspect-video"></div>
-    <div class="flex gap-2 justify-end">
-      <button class="btn ghost" onclick="closeAdd()">Đóng</button>
-      <button class="btn" onclick="saveSong()">Lưu bài</button>
-    </div>
+    <div class="card"><h3>Chọn bài từ YouTube</h3>
+      <div class="row"><input id="q" placeholder="Dán link YouTube hoặc gõ tên bài"><button class="p" onclick="addSong()">Thêm</button><button class="g" onclick="setKey()" title="API key tìm kiếm">⚙</button></div>
+      <div id="res"></div></div>
+    <div class="card"><h3>Hàng chờ</h3><div id="queue"></div></div>
+    <div class="card"><h3>🏆 Bảng xếp hạng</h3><div id="board"></div></div>
   </div>
 </div>
+<div id="rate"><div id="rt"></div><div class="n" id="rn"></div></div>
+<div id="toast"></div>
+<audio id="ra" autoplay></audio>
 
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-// ===== Tiện ích chung =====
-const $ = id => document.getElementById(id);
-const ROOMDESC = {
-  hoanggia: 'Nhung đỏ, ánh vàng, sọc rèm sân khấu',
-  vip1: 'Đèn neon và tia laser của câu lạc bộ đêm',
-  vip2: 'Lục bảo và đồng thau, ánh đèn ấm',
-  vip3: 'Bầu trời đêm đầy sao',
-  india: 'Hoa văn mandala vàng cam và xanh ngọc'
-};
-/** DÁN URL Web App của Apps Script (kết thúc bằng /exec) vào đây */
-const API_URL = 'https://script.google.com/macros/s/AKfycbwEN-ECDB2lwtTACIO75mjmQe_yewcISNxVDFjA5Hvd-M9lUYntfuZ-aDUcKYWNvEY8uA/exec';
-/** Gọi hàm backend qua fetch. Dùng text/plain để tránh lỗi CORS preflight */
-const api = async (fn, ...args) => {
-  if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(API_URL)) throw new Error('Chưa cấu hình API_URL trong index.html');
-  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ fn: fn, args: args }) });
-  const r = await res.json();
-  if (!r || !r.ok) throw new Error((r && r.error) || 'Lỗi không rõ');
-  return r.data;
-};
-const toast = m => alert(m);
-const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let uid, S = { rooms: [], songs: [], room: null, st: null, lines: [], curId: null, mine: false };
-try { uid = localStorage.getItem('kid') || (localStorage.kid = 'u' + Math.random().toString(36).slice(2, 9)); } catch (e) { uid = 'u' + Math.random().toString(36).slice(2, 9); }
-const myName = () => ($('nm').value.trim() || 'Khách ' + uid.slice(0, 3));
-try { $('nm').value = localStorage.getItem('kname') || ''; } catch (e) {}
-$('nm').onchange = () => { try { localStorage.kname = $('nm').value; } catch (e) {} };
+const $=s=>document.querySelector(s);
+let peer,me={id:'',name:''},room,isHost=false,hostConn,conns={},calls={},
+S={peers:[],queue:[],now:null,phase:'idle',rateEnd:0,board:{},hostNow:0,last:null},
+off=0,yt,ytReady=false,curVid='',ratings={},rated=false,mic=null,micBusy=false,ctx,nodes={},rtimer;
 
-// ===== Sảnh =====
-async function loadLobby() {
-  try {
-    const d = await api('getBootstrap');
-    S.rooms = d.rooms; S.songs = d.songs;
-    $('rooms').innerHTML = d.rooms.map(r => `
-      <div class="rc t-${r.id}" onclick="enter('${r.id}')"><div class="p-4">
-        <div class="text-2xl font-extrabold">${esc(r.name)}</div>
-        <div class="text-sm opacity-80 mt-1">${ROOMDESC[r.id] || ''}</div>
-        <div class="mt-6 font-semibold" style="color:var(--a)">${r.online}/${r.cap} người</div>
-      </div></div>`).join('');
-  } catch (e) { toast('Không tải được danh sách phòng: ' + e.message); }
-}
-
-// ===== Vào / rời phòng =====
-let poll = null;
-function enter(id) {
-  const r = S.rooms.find(x => x.id === id); if (!r) return;
-  S.room = r; document.body.className = 't-' + id;
-  $('lobby').classList.add('hidden'); $('room').classList.remove('hidden');
-  $('rname').textContent = 'Phòng ' + r.name;
-  renderSongs(); tick(); poll = setInterval(tick, 3000);
-}
-function leave() {
-  const rid = S.room && S.room.id; if (rid) api('leaveRoom', rid, uid).catch(() => {});
-  clearInterval(poll); stopAll(); S.room = null; voiceOff();
-  S.room = null; document.body.className = 't-vip1';
-  $('room').classList.add('hidden'); $('lobby').classList.remove('hidden'); loadLobby();
-}
-const srvNow = () => Date.now() + (S.off || 0);   // giờ máy chủ ước tính trên máy này
-async function tick() {
-  if (!S.room) return;
-  try {
-    // Người hát: gửi mốc bắt đầu thực tế của video (chỉ khi đang phát) để mọi người bám theo
-    let qid = '', sa = 0;
-    if (S.mine && S.curId && yt && yt.getPlayerState && yt.getPlayerState() === 1) { qid = S.curId; sa = Math.round(srvNow() - yt.getCurrentTime() * 1000); }
-    S.st = await api('getRoomState', S.room.id, uid, myName(), vOn ? 1 : 0, qid, sa);
-    // Độ lệch đồng hồ so với máy chủ: lấy trung vị 7 lần gần nhất để bớt nhiễu do độ trễ Apps Script
-    S.offs = (S.offs || []).concat(S.st.now - Date.now()).slice(-7);
-    const so = S.offs.slice().sort((a, b) => a - b); S.off = so[Math.floor(so.length / 2)];
-    renderRoom();
-  } catch (e) { console.warn(e); }
-}
-
-// ===== Hiển thị hàng chờ, thành viên, bảng xếp hạng =====
-function renderRoom() {
-  const st = S.st, cur = st.queue.find(q => q.status === 'playing') || st.queue[0];
-  $('queue').innerHTML = st.queue.map((q, i) =>
-    `<div>${i + 1}. <b>${esc(q.song ? q.song.title : '?')}</b> - ${esc(q.singer)}${q.status === 'playing' ? (isP(q) ? ' (tạm dừng)' : ' (đang hát)') : ''}${q.singerId === uid && q.status === 'waiting' ? ` <button class="underline text-xs" onclick="rmQ('${q.id}')">xóa</button>` : ''}</div>`).join('') || '<i class="opacity-60">Trống</i>';
-  $('mem').textContent = st.members.map(m => m.name + (m.v ? ' (voice)' : '')).join(', '); connectPeers(st.members);
-  $('board').innerHTML = st.board.map((b, i) => `<div>${i + 1}. ${esc(b.singer)} - ${b.score} <span class="opacity-60">${esc(b.title)}</span></div>`).join('') || '<i class="opacity-60">Chưa có điểm</i>';
-  const mine = !!cur && cur.singerId === uid;
-  $('go').classList.toggle('hidden', !(mine && cur.status === 'waiting'));
-  $('skip').classList.toggle('hidden', !mine);
-  $('pause').classList.toggle('hidden', !(mine && cur.status === 'playing'));
-  $('pause').textContent = cur && isP(cur) ? 'Tiếp tục' : 'Tạm dừng';
-  $('resync').classList.toggle('hidden', !(cur && cur.status === 'playing' && !S.mine));
-  $('now').textContent = cur ? `${cur.status === 'playing' ? 'Đang hát' : 'Tiếp theo'}: ${cur.singer} - ${cur.song ? cur.song.title : ''}${cur.status === 'waiting' && st.wait != null ? ' (chờ bấm hát ' + Math.ceil(st.wait / 1000) + 's)' : ''}` : 'Chưa có ai hát. Hãy đặt một bài!';
-  // Người xem: tự phát và căn theo giờ máy chủ
-  if (cur && cur.status === 'playing' && !mine) watch(cur, st.now);
-  // Người xem: bài đã hết hoặc bị bỏ thì dừng video
-  if (!S.mine && S.curId && !(cur && cur.id === S.curId && cur.status === 'playing')) stopAll();
-}
-function renderSongs() {
-  const k = ($('q').value || '').toLowerCase();
-  $('songs').innerHTML = S.songs.filter(s => (s.title + s.artist).toLowerCase().includes(k)).slice(0, 60).map(s =>
-    `<div class="flex gap-2 items-center"><span class="flex-1">${esc(s.title)} <span class="opacity-60">${esc(s.artist)}</span></span>
-     <button class="btn" onclick="order('${s.id}')">Đặt</button></div>`).join('') || '<i class="opacity-60">Chưa có bài. Bấm Thêm bài hát.</i>';
-}
-async function order(id) {
-  try { await api('enqueue', S.room.id, id, uid, myName()); tick(); } catch (e) { toast(e.message); }
-}
-
-// ===== Voice chat trong phòng (WebRTC qua PeerJS, các máy nối trực tiếp với nhau) =====
-let peer = null, vStream = null, vOn = false, vMute = false; const calls = {};
-const pid = id => 'krk' + S.room.id + '-' + id;
-function toggleVoice() { return vOn ? voiceOff() : voiceOn(); }
-async function voiceOn() {
-  if (vOn) return;
-  try { await getMic(); } catch (e) { return toast('Không mở được micro cho voice: ' + e.message); }
-  if (typeof Peer === 'undefined') return toast('Chưa tải được thư viện voice (PeerJS)');
-  vStream = new MediaStream([micStream.getAudioTracks()[0].clone()]);   // bản sao track để tắt tiếng mà không ảnh hưởng chấm điểm
-  vMute = false; peer = new Peer(pid(uid));
-  peer.on('call', c => { c.answer(vStream); hook(c); });
-  peer.on('error', e => console.warn('peer', e.type));
-  vOn = true; $('vbtn').textContent = 'Tắt voice'; $('vmute').classList.remove('hidden'); $('vmute').textContent = 'Tắt tiếng mic';
-  tick();
-}
-function voiceOff() {
-  Object.keys(calls).forEach(dropCall);
-  try { peer && peer.destroy(); } catch (e) {}
-  try { vStream && vStream.getTracks().forEach(t => t.stop()); } catch (e) {}
-  peer = null; vStream = null; vOn = false;
-  $('vbtn').textContent = 'Bật voice'; $('vmute').classList.add('hidden');
-  if (S.room) tick();
-}
-function toggleMute() {
-  if (!vStream) return;
-  vMute = !vMute; vStream.getAudioTracks()[0].enabled = !vMute; $('vmute').textContent = vMute ? 'Bật tiếng mic' : 'Tắt tiếng mic';
-}
-function hook(c) {
-  calls[c.peer] = c; c.t = Date.now();
-  c.on('stream', st => {
-    let a = document.getElementById('a_' + c.peer);
-    if (!a) { a = document.createElement('audio'); a.id = 'a_' + c.peer; a.autoplay = true; document.body.appendChild(a); }
-    a.srcObject = st; a.play().catch(() => {});
+/* ---------- Lobby / networking ---------- */
+const qs=new URLSearchParams(location.search);
+if(qs.get('room'))$('#code').value=qs.get('room');
+$('#name').value=localStorage.kcName||'';
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2500)}
+function go(host){
+  const name=$('#name').value.trim(),code=$('#code').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(!name||!code){$('#err').textContent='Nhập tên và mã phòng';return}
+  localStorage.kcName=name;me.name=name;room=code;isHost=host;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();ctx.resume();
+  peer=new Peer(host?'kc-'+code:undefined);
+  peer.on('error',e=>{
+    $('#err').textContent=e.type==='unavailable-id'?'Mã phòng đã tồn tại, hãy vào phòng hoặc đổi mã':e.type==='peer-unavailable'?'Không tìm thấy phòng':'Lỗi kết nối: '+e.type;
+    if(!$('#app').style.display||$('#app').style.display==='none'){try{peer.destroy()}catch(_){}}
   });
-  c.on('close', () => dropCall(c.peer)); c.on('error', () => dropCall(c.peer));
-}
-function dropCall(id) {
-  try { calls[id] && calls[id].close(); } catch (e) {}
-  delete calls[id]; const a = document.getElementById('a_' + id); if (a) a.remove();
-}
-/** Gọi tới người trong phòng đang bật voice (bên có uid nhỏ hơn là bên gọi để tránh gọi trùng) */
-function connectPeers(members) {
-  if (!vOn || !peer || !peer.open) return;
-  const ids = {};
-  members.forEach(m => {
-    if (m.id === uid || !m.v) return;
-    const id = pid(m.id); ids[id] = 1;
-    const old = calls[id];
-    if (old && !old.open && Date.now() - old.t > 10000) dropCall(id);   // cuộc gọi treo quá 10 giây thì gọi lại
-    if (!calls[id] && uid < m.id) { const c = peer.call(id, vStream); if (c) hook(c); }
-  });
-  Object.keys(calls).forEach(id => { if (!ids[id]) dropCall(id); });
-}
-
-// ===== Thanh kéo thời gian: chỉ người hát kéo được, người xem chỉ xem =====
-let seeking = false;
-const fmt = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-function seekStart() { seeking = true; }
-function seekEnd() { setTimeout(() => { seeking = false; }, 300); }
-async function doSeek(v) {
-  seeking = false;
-  if (!S.mine || !yt) return;
-  yt.seekTo(+v, true);
-  const cur = S.st && S.st.queue.find(q => q.id === S.curId);
-  if (cur && isP(cur)) {   // đang tạm dừng: lưu vị trí mới cho người xem
-    try { await api('pauseSong', cur.id, uid, Math.round(v * 1000)); cur.pos = Math.round(v * 1000); } catch (e) { toast(e.message); }
-  } else setTimeout(tick, 400);   // đang phát: gửi mốc đồng bộ mới
-}
-/** Người xem bấm để nhảy ngay tới vị trí của người hát */
-function resync() {
-  const c = S.st && S.st.queue.find(q => q.id === S.curId);
-  if (!c || !yt) return;
-  yt.seekTo(Math.max(0, targetOf(c)), true); if (!isP(c)) yt.playVideo();
-}
-/** Cập nhật thanh thời gian và hiển thị độ lệch so với người hát (mỗi 0,5 giây) */
-setInterval(() => {
-  if (!yt || typeof yt.getDuration !== 'function') return;
-  const sk = $('seek'), d = yt.getDuration() || 0, t = yt.getCurrentTime() || 0;
-  sk.disabled = !S.mine;
-  if (seeking) return;
-  sk.max = d || 100; sk.value = t; $('tcur').textContent = fmt(t); $('tdur').textContent = fmt(d);
-  const c = S.st && S.curId && S.st.queue.find(q => q.id === S.curId);
-  $('drift').textContent = (c && !S.mine && (c.sa || isP(c))) ? 'Lệch ' + (t - targetOf(c)).toFixed(1) + 's' : '';
-}, 500);
-
-// ===== Tìm nhạc trên YouTube rồi đặt hát =====
-let ytRes = [];
-async function ytSearch() {
-  const q = $('yq').value.trim(); if (!q) return;
-  $('yres').innerHTML = '<i class="opacity-60">Đang tìm...</i>';
-  try {
-    ytRes = await api('searchYouTube', q + ($('ykar').checked ? ' karaoke' : ''));
-    $('yres').innerHTML = ytRes.map((r, i) => `
-      <div class="flex gap-2 items-center">
-        <img src="https://i.ytimg.com/vi/${r.videoId}/mqdefault.jpg" class="w-20 rounded" alt="">
-        <div class="flex-1 min-w-0"><div class="truncate font-semibold">${esc(r.title)}</div><div class="truncate text-xs opacity-60">${esc(r.channel)}</div></div>
-        <button class="btn" onclick="pickYt(${i})">Hát</button>
-      </div>`).join('') || '<i class="opacity-60">Không có kết quả</i>';
-  } catch (e) { $('yres').innerHTML = ''; toast(e.message); }
-}
-/** Lưu bài vào thư viện (nếu chưa có) rồi thêm vào hàng chờ */
-async function pickYt(i) {
-  const r = ytRes[i]; if (!r) return;
-  try {
-    let s = S.songs.find(x => x.videoId === r.videoId);
-    if (!s) { s = await api('addSong', { videoId: r.videoId, title: r.title, artist: r.channel, lrc: '', addedBy: myName() }); S.songs.unshift(s); renderSongs(); }
-    await api('enqueue', S.room.id, s.id, uid, myName()); tick();
-  } catch (e) { toast(e.message); }
-}
-
-// ===== YouTube player =====
-let yt = null, ytReady = false, curVid = null;
-function onYouTubeIframeAPIReady() { ytReady = true; }
-function loadVideo(vid, start) {
-  return new Promise(res => {
-    if (!ytReady) return toast('YouTube chưa tải xong, thử lại sau vài giây');
-    if (yt && yt.loadVideoById) { yt.loadVideoById({ videoId: vid, startSeconds: start || 0 }); curVid = vid; return res(); }
-    yt = new YT.Player('yt', { width: '100%', height: '100%', videoId: vid,
-      playerVars: { controls: 0, rel: 0, playsinline: 1, autoplay: 1, start: Math.floor(start || 0) },
-      events: { onReady: e => { e.target.playVideo(); res(); }, onStateChange: onYtState } });
-    curVid = vid;
-  });
-}
-function onYtState(e) {
-  if (e.data === 0 && S.mine) endSong();   // 0 = video kết thúc
-  if (e.data === 1 && S.mine) tick();      // 1 = bắt đầu phát: gửi mốc đồng bộ ngay
-}
-
-/** Bài chưa có lời đồng bộ: chia thành các đoạn 6 giây để vẫn chấm điểm, và phóng to video để đọc lời có sẵn */
-function linesFor(song) {
-  const L = parseLrc(song && song.lrc), big = !L.length;
-  $('vbox').className = big ? 'w-full max-w-xl aspect-video bg-black rounded-lg overflow-hidden' : 'w-48 aspect-video bg-black rounded-lg overflow-hidden';
-  $('stage').classList.toggle('hidden', big);
-  return big ? Array.from({ length: 100 }, (_, i) => ({ t: i * 6, text: '♪' })) : L;
-}
-function parseLrc(t) {
-  const out = [];
-  (t || '').split(/\r?\n/).forEach(l => {
-    const m = l.match(/^\[(\d+):(\d+(?:\.\d+)?)\](.*)$/);
-    if (m) out.push({ t: +m[1] * 60 + parseFloat(m[2]), text: m[3].trim() });
-  });
-  return out.sort((a, b) => a.t - b.t);
-}
-
-// ===== Người hát: mở mic, phát nhạc, chấm điểm =====
-async function sing() {
-  const cur = S.st.queue[0]; if (!cur || !cur.song) return;
-  // Mở micro; nếu lỗi thì báo đúng nguyên nhân và cho hát không chấm điểm
-  S.noMic = false;
-  try { await startMic(); } catch (e) {
-    const why = e.name === 'NotFoundError' ? 'Không tìm thấy micro trên thiết bị. Hãy cắm micro hoặc tai nghe rồi thử lại.'
-      : e.name === 'NotAllowedError' ? 'Trình duyệt đang chặn quyền micro. Bấm biểu tượng ổ khóa cạnh thanh địa chỉ để cho phép.'
-      : 'Không mở được micro: ' + e.message;
-    if (!confirm(why + '\n\nBấm OK để vẫn hát nhưng không chấm điểm, Hủy để quay lại.')) return;
-    S.noMic = true;
-  }
-  try {
-    if (!S.noMic && !vOn) await voiceOn();   // bật voice để mọi người nghe được giọng hát
-    await api('startSong', cur.id);
-    S.mine = true; S.curId = cur.id; S.lines = linesFor(cur.song); resetScore();
-    await loadVideo(cur.song.videoId, 0); loop();
-  } catch (e) { toast(e.message); }
-}
-const isP = q => !!q && (q.paused === 1 || q.paused === '1' || q.paused === true);
-/** Vị trí (giây) mà video của người xem phải đang ở */
-const targetOf = c => isP(c) ? (+c.pos || 0) / 1000 : (srvNow() - c.sa) / 1000;
-/** Người xem: bám theo trạng thái của người hát (đang phát tại giây X hoặc đang dừng tại vị trí Y) */
-function watch(cur) {
-  if (!isP(cur) && !cur.sa) return;   // người hát chưa thực sự phát nhạc, chờ mốc đồng bộ
-  if (S.curId !== cur.id) {
-    S.curId = cur.id; S.mine = false; S.noMic = false; S.lines = linesFor(cur.song);
-    if (cur.song) loadVideo(cur.song.videoId, Math.max(0, targetOf(cur))).then(() => {
-      loop();
-      setTimeout(() => { const c = S.st && S.st.queue.find(q => q.id === S.curId); if (c) applySync(c); }, 2500);   // chỉnh lại sau khi video tải xong
-    });
-    return;
-  }
-  applySync(cur);
-}
-function applySync(cur) {
-  if (!yt || !yt.getPlayerState) return;
-  const paused = isP(cur), target = targetOf(cur), state = yt.getPlayerState();
-  if (paused) {
-    if (state === 1) yt.pauseVideo();
-    if (Math.abs(yt.getCurrentTime() - target) > 1) yt.seekTo(target, true);
-  } else {
-    if (state === 2) yt.playVideo();
-    if (state === 1 && Math.abs(yt.getCurrentTime() - target) > 1) yt.seekTo(Math.max(0, target), true);   // lệch quá 1 giây thì nhảy lại
-    $('tap').classList.toggle('hidden', state === 1 || state === 3);   // trình duyệt chặn tự phát thì hiện nút bấm
-  }
-}
-async function endSong() {
-  const id = S.curId; S.mine = false; const sc = total();
-  try {
-    if (S.noMic) await api('skipSong', id);   // hát không micro: không lưu điểm
-    else { await api('finishSong', id, sc); toast('Điểm của bạn: ' + sc); }
-  } catch (e) { toast(e.message); }
-  stopAll(); tick();
-}
-/** Người hát bấm tạm dừng / tiếp tục: máy chủ lưu lại để mọi người trong phòng cùng dừng / chạy */
-async function togglePause() {
-  const cur = S.st.queue.find(q => q.id === S.curId); if (!cur || !yt) return;
-  const pos = Math.round(yt.getCurrentTime() * 1000), p = isP(cur);
-  try {
-    if (p) { yt.playVideo(); await api('resumeSong', cur.id, uid, pos); } else { yt.pauseVideo(); await api('pauseSong', cur.id, uid, pos); }
-    cur.paused = p ? 0 : 1; renderRoom(); tick();
-  } catch (e) { toast(e.message); }
-}
-function tapPlay() { try { yt.playVideo(); } catch (e) {} $('tap').classList.add('hidden'); }
-async function rmQ(id) { try { await api('removeQueue', id, uid); tick(); } catch (e) { toast(e.message); } }
-async function skipMine() {
-  const cur = S.st.queue[0]; if (!cur) return;
-  try { await api('skipSong', cur.id); } catch (e) { toast(e.message); }
-  stopAll(); tick();
-}
-function stopAll() {
-  S.mine = false; S.curId = null; S.lines = []; linesFor(null);
-  try { yt && yt.stopVideo && yt.stopVideo(); } catch (e) {}
-  cancelAnimationFrame(raf); clearInterval(micT);
-  ['l0', 'l2', 'l3'].forEach(i => $(i).textContent = ''); $('l1').textContent = 'Lời bài hát sẽ chạy ở đây'; $('l1').style.setProperty('--p', '0%');
-}
-
-// ===== Vòng lặp hiển thị lời (mỗi khung hình) =====
-let raf = 0, idx = -1;
-function loop() {
-  cancelAnimationFrame(raf);
-  const L = S.lines;
-  const f = () => {
-    if (!yt || !yt.getCurrentTime) return (raf = requestAnimationFrame(f));
-    const t = yt.getCurrentTime(); let i = -1;
-    for (let k = 0; k < L.length; k++) if (L[k].t <= t) i = k; else break;
-    if (i !== idx) { closeLine(idx); idx = i; openLine(i); }
-    if (i >= 0 && L.length) {
-      const end = L[i + 1] ? L[i + 1].t : L[i].t + 5;
-      $('l1').style.setProperty('--p', Math.min(100, (t - L[i].t) / (end - L[i].t) * 100) + '%');
+  peer.on('open',id=>{
+    me.id=id;
+    if(host){S.peers=[{id,name}];enter();bcast()}
+    else{
+      hostConn=peer.connect('kc-'+code,{reliable:true});
+      hostConn.on('open',()=>{hostConn.send({t:'hello',name});enter()});
+      hostConn.on('data',m=>{
+        if(m.t==='S'){off=m.S.hostNow-Date.now();S=m.S;render()}
+        if(m.t==='cheer')toast('🍻 '+m.n+' cụng ly!');
+      });
+      hostConn.on('close',()=>{toast('Chủ phòng đã thoát');setTimeout(()=>location.reload(),1500)});
     }
-    raf = requestAnimationFrame(f);
-  };
-  idx = -2; f();
+  });
+  peer.on('connection',c=>{
+    if(!isHost)return;
+    c.on('data',m=>hostMsg(c,m));
+    c.on('close',()=>{delete conns[c.peer];S.peers=S.peers.filter(p=>p.id!==c.peer);
+      if(S.now&&S.now.song.by===c.peer&&S.phase==='play')endSong();else bcast()});
+  });
+  peer.on('call',c=>{
+    c.answer();
+    c.on('stream',s=>{const a=$('#ra');a.srcObject=s;a.play().catch(()=>{})});
+  });
 }
-function openLine(i) {
-  const L = S.lines, g = k => (L[k] ? L[k].text : '');
-  $('l0').textContent = g(i - 1);
-  $('l1').textContent = i >= 0 ? (g(i) || '♪') : (L.length ? '♪' : 'Bài này chưa có lời đồng bộ');
-  $('l2').textContent = g(i + 1); $('l3').textContent = g(i + 2);
-  lineAcc = { n: 0, v: 0, pairs: 0, stable: 0 };
+function enter(){$('#lobby').style.display='none';$('#app').style.display='flex';$('#rm').textContent='Phòng: '+room;initScene();render()}
+function copyLink(){const u=location.origin+location.pathname+'?room='+room;navigator.clipboard&&navigator.clipboard.writeText(u);toast('Đã sao chép link phòng')}
+function send(m){if(isHost)hostMsg({peer:me.id},m);else hostConn&&hostConn.open&&hostConn.send(m)}
+function bcast(){S.hostNow=Date.now();Object.values(conns).forEach(c=>c.open&&c.send({t:'S',S}));render()}
+
+/* ---------- Host logic ---------- */
+function hostMsg(c,m){
+  const id=c.peer;
+  if(m.t==='hello'){conns[id]=c;S.peers=S.peers.filter(p=>p.id!==id).concat({id,name:m.name});bcast()}
+  else if(m.t==='add'){S.queue.push(m.song);if(S.phase==='idle')next();else bcast()}
+  else if(m.t==='skip'){if(S.phase==='play'&&S.now&&(id===S.now.song.by||id===me.id))endSong()}
+  else if(m.t==='rate'){if(S.phase==='rate'&&S.now&&id!==S.now.song.by)ratings[id]=Math.max(1,Math.min(10,+m.v|0))}
+  else if(m.t==='cheer'){Object.values(conns).forEach(x=>x.open&&x.send({t:'cheer',n:m.n}));toast('🍻 '+m.n+' cụng ly!')}
+}
+function next(){
+  const s=S.queue.shift();
+  if(!s){S.now=null;S.phase='idle'}else{S.now={song:s,startAt:Date.now()};S.phase='play'}
+  bcast();
+}
+function endSong(){
+  if(S.phase!=='play')return;
+  S.phase='rate';S.rateEnd=Date.now()+10000;ratings={};bcast();
+  clearTimeout(rtimer);rtimer=setTimeout(finish,10000);
+}
+function finish(){
+  const v=Object.values(ratings),sg=S.now&&S.now.song;
+  if(sg&&v.length){
+    const avg=v.reduce((a,b)=>a+b,0)/v.length,b=S.board[sg.byName]||{sum:0,n:0,best:0};
+    b.sum+=avg;b.n++;b.best=Math.max(b.best,avg);S.board[sg.byName]=b;S.last={name:sg.byName,avg};
+  }else S.last=null;
+  next();
 }
 
-// ===== Chấm điểm: micro -> cao độ (tự tương quan) -> điểm từng dòng =====
-let ctx, an, buf, micT, lineAcc = { n: 0, v: 0, pairs: 0, stable: 0 }, prevSt = null, scores = [], combo = 0;
-/** Một luồng micro dùng chung cho chấm điểm, nghe lại giọng và voice */
-let micStream = null;
-async function getMic() {
-  if (!micStream) micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false } });
-  return micStream;
+/* ---------- Songs ---------- */
+const vidOf=s=>{const m=s.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:/^[\w-]{11}$/.test(s)?s:null};
+async function titleOf(v){try{const r=await fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+v));return (await r.json()).title}catch(e){return v}}
+async function pushSong(vid,title){
+  send({t:'add',song:{vid,title:title||await titleOf(vid),by:me.id,byName:me.name}});toast('Đã thêm vào hàng chờ');
 }
-let dryG, wetG;
-/** Tạo tiếng vang (reverb) bằng nhiễu giảm dần theo thời gian */
-function impulse(sec) {
-  const n = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, n, ctx.sampleRate);
-  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.5); }
-  return b;
+async function addSong(){
+  const q=$('#q').value.trim();if(!q)return;
+  const v=vidOf(q);
+  if(v){await pushSong(v);$('#q').value='';$('#res').innerHTML='';return}
+  const key=localStorage.kcKey;
+  if(!key){toast('Dán link YouTube, hoặc bấm ⚙ nhập YouTube API key để tìm theo tên');return}
+  try{
+    const r=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&videoEmbeddable=true&q='+encodeURIComponent(q+' karaoke')+'&key='+key);
+    const j=await r.json();if(j.error)throw j.error;
+    const box=$('#res');box.innerHTML='';
+    j.items.forEach(i=>{
+      const d=document.createElement('div');d.className='it s';
+      d.innerHTML='<span></span><b>＋</b>';d.firstChild.textContent=i.snippet.title.replace(/&amp;|&#39;|&quot;/g,' ');
+      d.onclick=()=>{pushSong(i.id.videoId,d.firstChild.textContent);box.innerHTML='';$('#q').value=''};
+      box.appendChild(d);
+    });
+  }catch(e){toast('Lỗi tìm kiếm (kiểm tra API key)')}
 }
-/** Bật/tắt và chỉnh âm lượng, độ vang của giọng hát nghe lại */
-function setMon() {
-  if (!dryG) return;
-  const on = $('mon').checked, v = $('monv').value / 100, e = $('mone').value / 100;
-  dryG.gain.value = on ? v : 0; wetG.gain.value = on ? v * e * 1.5 : 0;
+function setKey(){const k=prompt('YouTube Data API v3 key (tùy chọn, để tìm bài theo tên):',localStorage.kcKey||'');if(k!==null)localStorage.kcKey=k.trim()}
+function skip(){send({t:'skip'})}
+function cheer(){send({t:'cheer',n:me.name})}
+function rate(v){if(rated)return;rated=true;if(isHost)ratings[me.id]=v;else send({t:'rate',v});$('#rt').textContent='Đã chấm '+v+'/10 ✔';$('#rn').innerHTML=''}
+
+/* ---------- YouTube sync ---------- */
+function onYouTubeIframeAPIReady(){
+  const pv={playsinline:1,rel:0,modestbranding:1};
+  if(location.protocol.startsWith('http'))pv.origin=location.origin;
+  yt=new YT.Player('yt',{width:'100%',height:'100%',playerVars:pv,
+    events:{onReady:()=>{ytReady=true;render()},
+      onStateChange:e=>{if(e.data===0&&isHost&&S.phase==='play')endSong()},
+      onError:e=>{
+        const m={153:'Hãy mở trang qua http(s) (Vercel hoặc localhost), không mở bằng file://',101:'Video này không cho phép nhúng',150:'Video này không cho phép nhúng',100:'Video không tồn tại hoặc đã bị xóa'};
+        toast('Lỗi YouTube '+e.data+': '+(m[e.data]||'không phát được'));
+        if(isHost&&e.data!==153&&S.phase==='play')setTimeout(endSong,1500);
+      }}});
 }
-async function startMic() {
-  if (ctx) { await ctx.resume(); return setMon(); }
-  const s = await getMic();
-  ctx = new AudioContext({ latencyHint: 'interactive' }); an = ctx.createAnalyser(); an.fftSize = 2048;
-  const src = ctx.createMediaStreamSource(s); src.connect(an); buf = new Float32Array(an.fftSize);
-  // Đường nghe lại: mic -> (giọng gốc + vang) -> tai nghe
-  dryG = ctx.createGain(); wetG = ctx.createGain(); const cv = ctx.createConvolver(); cv.buffer = impulse(1.8);
-  src.connect(dryG); src.connect(cv); cv.connect(wetG); dryG.connect(ctx.destination); wetG.connect(ctx.destination);
-  setMon();
+setInterval(()=>{ // drift correction
+  if(!ytReady||S.phase!=='play'||!S.now||curVid!==S.now.song.vid)return;
+  const pos=(Date.now()+off-S.now.startAt)/1000,cur=yt.getCurrentTime();
+  if(Math.abs(cur-pos)>2.5)yt.seekTo(pos,true);
+  if(yt.getPlayerState()===2)yt.playVideo();
+},4000);
+
+/* ---------- Microphone (only singer, never in background) ---------- */
+async function micOn(){
+  if(mic||micBusy)return;micBusy=true;
+  try{
+    await ctx.resume();
+    const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:false}});
+    if(!amSinger()||document.hidden){st.getTracks().forEach(t=>t.stop());micBusy=false;return}
+    mic=st;
+    const src=ctx.createMediaStreamSource(st),hp=ctx.createBiquadFilter(),comp=ctx.createDynamicsCompressor(),eq=ctx.createBiquadFilter(),
+      dry=ctx.createGain(),wet=ctx.createGain(),conv=ctx.createConvolver(),mix=ctx.createGain(),mon=ctx.createGain(),an=ctx.createAnalyser(),dest=ctx.createMediaStreamDestination();
+    hp.type='highpass';hp.frequency.value=110;eq.type='peaking';eq.frequency.value=3200;eq.Q.value=.8;
+    const len=ctx.sampleRate*1.8,buf=ctx.createBuffer(2,len,ctx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+    conv.buffer=buf;
+    src.connect(hp);hp.connect(comp);comp.connect(eq);eq.connect(dry);eq.connect(conv);conv.connect(wet);dry.connect(mix);wet.connect(mix);
+    mix.connect(dest);mix.connect(an);mix.connect(mon);mon.connect(ctx.destination);
+    nodes={comp,eq,wet,mon,an,stream:dest.stream};applyFx();
+    callAll();
+  }catch(e){toast('Không mở được micro: cho phép quyền micro nhé')}
+  micBusy=false;
 }
-function resetScore() {
-  scores = []; combo = 0; prevSt = null; $('score').textContent = '0'; $('rate').textContent = ''; $('combo').textContent = '';
-  clearInterval(micT); micT = setInterval(sample, 50);
+function applyFx(){
+  if(!nodes.eq)return;const on=$('#fx').checked;
+  nodes.eq.gain.value=on?4:0;nodes.wet.gain.value=on?.28:0;nodes.comp.ratio.value=on?6:1;nodes.comp.threshold.value=on?-28:0;
+  nodes.mon.gain.value=$('#mon').checked?1:0;
 }
-/** Trả về tần số (Hz) nếu đang có tiếng hát có cao độ rõ, ngược lại 0 */
-function detect() {
-  an.getFloatTimeDomainData(buf);
-  let e = 0; for (let i = 0; i < buf.length; i++) e += buf[i] * buf[i];
-  const rms = Math.sqrt(e / buf.length); $('vu').style.width = Math.min(100, rms * 400) + '%';
-  if (rms < 0.015) return 0;
-  const sr = ctx.sampleRate, lo = Math.floor(sr / 1000), hi = Math.floor(sr / 80);
-  let best = 0, bl = 0;
-  for (let lag = lo; lag < hi; lag++) {
-    let c = 0, n = 0;
-    for (let i = 0; i < buf.length - lag; i += 2) { c += buf[i] * buf[i + lag]; n += buf[i] * buf[i]; }
-    const r = c / (n || 1); if (r > best) { best = r; bl = lag; }
+$('#fx').onchange=applyFx;$('#mon').onchange=applyFx;
+function micOff(){
+  if(mic){mic.getTracks().forEach(t=>t.stop());mic=null}
+  Object.values(calls).forEach(c=>{try{c.close()}catch(_){}});calls={};nodes={};
+}
+function callAll(){
+  if(!mic||!nodes.stream)return;
+  S.peers.forEach(p=>{if(p.id!==me.id&&!(calls[p.id]&&calls[p.id].open!==false)){calls[p.id]=peer.call(p.id,nodes.stream)}});
+}
+const amSinger=()=>S.phase==='play'&&S.now&&S.now.song.by===me.id;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)micOff(); // never hold the phone mic in background
+  else if(amSinger())micOn();
+});
+
+/* ---------- Render ---------- */
+function render(){
+  const n=S.now&&S.now.song;
+  $('#nowt').textContent=!n?'Chưa có bài hát — hãy thêm bài!':(S.phase==='rate'?'Đang chấm điểm: ':'🎤 '+n.byName+' đang hát: ')+n.title;
+  $('#skip').style.display=(S.phase==='play'&&(isHost||amSinger()))?'block':'none';
+  $('#queue').innerHTML=S.queue.length?S.queue.map((s,i)=>'<div class="it"><span>'+(i+1)+'. '+esc(s.title)+'</span><small>'+esc(s.byName)+'</small></div>').join(''):'<small>Trống</small>';
+  const bd=Object.entries(S.board).map(([k,v])=>[k,v.sum/v.n,v.n]).sort((a,b)=>b[1]-a[1]);
+  $('#board').innerHTML=bd.length?bd.map((x,i)=>'<div class="it"><span>'+(i+1)+'. '+esc(x[0])+'</span><b>'+x[1].toFixed(1)+' <small>('+x[2]+' bài)</small></b></div>').join(''):'<small>Chưa có điểm</small>';
+  // player
+  if(ytReady){
+    if(S.phase==='play'&&n){
+      if(curVid!==n.vid){curVid=n.vid;yt.loadVideoById({videoId:n.vid,startSeconds:Math.max(0,(Date.now()+off-S.now.startAt)/1000)})}
+    }else if(curVid){curVid='';yt.stopVideo()}
   }
-  return best > 0.8 ? sr / bl : 0;
+  // mic
+  if(amSinger()&&!document.hidden){micOn();callAll()}else micOff();
+  // rating overlay
+  const ro=$('#rate');
+  if(S.phase==='rate'&&n){
+    ro.style.display='block';
+    if(n.by===me.id){$('#rt').textContent='Bạn vừa hát xong! Đang chờ mọi người chấm điểm...';$('#rn').innerHTML=''}
+    else if(!ro._k||ro._k!==n.vid+S.rateEnd){
+      ro._k=n.vid+S.rateEnd;rated=false;
+      $('#rt').textContent='Chấm điểm '+n.byName+' (10 giây)';
+      $('#rn').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(v=>'<button class="p" onclick="rate('+v+')">'+v+'</button>').join('');
+    }
+    clearTimeout(ro._h);ro._h=setTimeout(()=>{ro.style.display='none'},Math.max(0,S.rateEnd-(Date.now()+off))+300);
+  }else{ro.style.display='none';ro._k=''; if(S.phase==='play'&&S.last)toast('⭐ '+S.last.name+': '+S.last.avg.toFixed(1)+'/10')}
+  buildAvatars();
 }
-function sample() {
-  if (!S.mine || !ctx || !yt || yt.getPlayerState() !== 1 || idx < 0 || !S.lines[idx] || !S.lines[idx].text) return;
-  const f = detect(); lineAcc.n++;
-  if (f) {
-    lineAcc.v++; const st = 12 * Math.log2(f / 440);
-    if (prevSt !== null) { lineAcc.pairs++; if (Math.abs(st - prevSt) < 2) lineAcc.stable++; }
-    prevSt = st;
-  } else prevSt = null;
-}
-/** Chốt điểm dòng vừa hát: 75% theo độ phủ giọng hát + 25% theo độ ổn định cao độ */
-function closeLine(i) {
-  if (!S.mine || i < 0 || !S.lines[i] || !S.lines[i].text || !lineAcc.n) return;
-  const ratio = lineAcc.v / lineAcc.n, stab = lineAcc.stable / Math.max(1, lineAcc.pairs);
-  const sc = Math.min(1, ratio / 0.55) * 100 * (0.75 + 0.25 * stab);
-  scores.push(sc); combo = sc >= 70 ? combo + 1 : 0;
-  $('score').textContent = total();
-  $('rate').textContent = sc >= 90 ? 'Hoàn hảo' : sc >= 70 ? 'Tốt' : sc >= 50 ? 'Khá' : 'Cố lên';
-  $('combo').textContent = combo > 1 ? 'Chuỗi ' + combo + ' dòng tốt' : '';
-}
-const total = () => scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-// ===== Thêm bài hát + công cụ đồng bộ lời =====
-let yt2 = null, sLines = [], sOut = [];
-const vidId = u => { const m = String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : (/^[\w-]{11}$/.test(u) ? u : ''); };
-function openAdd() { $('add').classList.remove('hidden'); }
-function closeAdd() { $('add').classList.add('hidden'); try { yt2 && yt2.stopVideo(); } catch (e) {} }
-function syncStart() {
-  const v = vidId($('aurl').value.trim()); if (!v) return toast('Hãy nhập link YouTube trước');
-  sLines = $('alrc').value.split(/\r?\n/).map(l => l.replace(/^\[[^\]]*\]/, '').trim()).filter(Boolean);
-  if (!sLines.length) return toast('Hãy dán lời bài hát trước');
-  sOut = []; $('yt2').classList.remove('hidden'); $('stamp').classList.remove('hidden');
-  const mk = () => { yt2 = new YT.Player('yt2', { width: '100%', height: '100%', videoId: v, playerVars: { playsinline: 1 }, events: { onReady: e => e.target.playVideo() } }); };
-  if (yt2 && yt2.loadVideoById) yt2.loadVideoById(v); else mk();
-  $('sinfo').textContent = 'Nghe nhạc, khi lời dòng đầu bắt đầu thì bấm Đánh dấu (hoặc phím Space).';
+/* ---------- 3D scene ---------- */
+let sc,cam,rd,avs={},lights=[],sig='';
+function initScene(){
+  const cv=$('#cv');rd=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  sc=new THREE.Scene();sc.background=new THREE.Color(0x1a0b2e);sc.fog=new THREE.Fog(0x1a0b2e,8,22);
+  cam=new THREE.PerspectiveCamera(50,1,.1,50);cam.position.set(0,3.2,9);cam.lookAt(0,1,0);
+  sc.add(new THREE.AmbientLight(0x6644aa,.9));
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshStandardMaterial({color:0x2a1647}));fl.rotation.x=-Math.PI/2;sc.add(fl);
+  const st=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.4,.4,32),new THREE.MeshStandardMaterial({color:0x7c5cff,emissive:0x221155}));st.position.set(0,.2,-2.5);sc.add(st);
+  [0xff4fa3,0x4fd0ff,0xffe14f].forEach((c,i)=>{const l=new THREE.PointLight(c,30,14);l.position.set(-4+i*4,5,-1);sc.add(l);lights.push(l)});
+  addEventListener('resize',fit);fit();
+  rd.setAnimationLoop(t=>{
+    t/=1000;lights.forEach((l,i)=>{l.position.x=Math.sin(t*.8+i*2)*5});
+    let lvl=0;
+    if(nodes.an){const a=new Uint8Array(nodes.an.fftSize);nodes.an.getByteTimeDomainData(a);let m=0;a.forEach(v=>m=Math.max(m,Math.abs(v-128)));lvl=m/128}
+    Object.entries(avs).forEach(([id,g],i)=>{
+      const sing=S.now&&S.phase==='play'&&S.now.song.by===id;
+      const amp=sing?(id===me.id?lvl*.5:.15+.12*Math.abs(Math.sin(t*7))):.04;
+      g.position.y=g.userData.y+Math.abs(Math.sin(t*3+i))*amp;g.scale.setScalar(sing?1.25+(id===me.id?lvl*.3:0):1);
+    });
+    rd.render(sc,cam);
+  });
 }
-function stamp() {
-  if (!yt2 || sOut.length >= sLines.length) return;
-  const t = yt2.getCurrentTime(), m = Math.floor(t / 60), s = (t - m * 60).toFixed(2).padStart(5, '0');
-  sOut.push(`[${String(m).padStart(2, '0')}:${s}] ${sLines[sOut.length]}`);
-  $('alrc').value = sOut.join('\n');
-  $('sinfo').textContent = sOut.length < sLines.length ? 'Dòng kế: ' + sLines[sOut.length] : 'Đã đồng bộ xong. Bấm Lưu bài.';
+function fit(){const c=$('#cv');rd.setSize(c.clientWidth,c.clientHeight,false);cam.aspect=c.clientWidth/c.clientHeight;cam.updateProjectionMatrix()}
+function label(txt){
+  const c=document.createElement('canvas');c.width=256;c.height=64;const x=c.getContext('2d');
+  x.font='bold 34px sans-serif';x.textAlign='center';x.fillStyle='#fff';x.strokeStyle='#000';x.lineWidth=6;
+  x.strokeText(txt,128,44);x.fillText(txt,128,44);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));s.scale.set(2,.5,1);return s;
 }
-document.addEventListener('keydown', e => { if (e.code === 'Space' && !$('stamp').classList.contains('hidden') && !$('add').classList.contains('hidden') && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); stamp(); } });
-async function saveSong() {
-  const v = vidId($('aurl').value.trim());
-  if (!v) return toast('Link YouTube không hợp lệ');
-  if (!$('atit').value.trim()) return toast('Hãy nhập tên bài');
-  try {
-    await api('addSong', { videoId: v, title: $('atit').value.trim(), artist: $('aart').value.trim(), lrc: $('alrc').value, addedBy: myName() });
-    toast('Đã lưu bài hát'); closeAdd(); ['aurl', 'atit', 'aart', 'alrc'].forEach(i => $(i).value = '');
-    S.songs = (await api('getBootstrap')).songs; renderSongs();
-  } catch (e) { toast(e.message); }
+function buildAvatars(){
+  if(!sc)return;
+  const singer=S.phase==='play'&&S.now?S.now.song.by:'',s=S.peers.map(p=>p.id+p.name).join()+singer;
+  if(s===sig)return;sig=s;
+  Object.values(avs).forEach(g=>sc.remove(g));avs={};
+  const aud=S.peers.filter(p=>p.id!==singer);
+  S.peers.forEach(p=>{
+    let h=0;for(const ch of p.id)h=(h*31+ch.charCodeAt(0))%360;
+    const col=new THREE.Color().setHSL(h/360,.7,.6),g=new THREE.Group();
+    const b=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,.9,16),new THREE.MeshStandardMaterial({color:col}));b.position.y=.45;
+    const hd=new THREE.Mesh(new THREE.SphereGeometry(.3,20,20),new THREE.MeshStandardMaterial({color:0xffd9b3}));hd.position.y=1.1;
+    g.add(b,hd);const l=label(p.name);l.position.y=1.8;g.add(l);
+    if(p.id===singer){g.position.set(0,.4,-2.5);g.userData.y=.4;
+      if(p.id!==''){const m=new THREE.Mesh(new THREE.SphereGeometry(.08),new THREE.MeshStandardMaterial({color:0xffffff}));m.position.set(.3,.9,.3);g.add(m)}}
+    else{const i=aud.indexOf(p),n=aud.length,a=(i-(n-1)/2)*.55;g.position.set(Math.sin(a)*5,0,Math.cos(a)*2.5-.5);g.userData.y=0;g.rotation.y=Math.PI*0+0}
+    sc.add(g);avs[p.id]=g;
+  });
 }
-// Đóng tab: báo máy chủ để lượt hát không bị kẹt
-addEventListener('pagehide', () => { if (S.room && navigator.sendBeacon) navigator.sendBeacon(API_URL, JSON.stringify({ fn: 'leaveRoom', args: [S.room.id, uid] })); });
-loadLobby();
 </script>
 </body>
 </html>
